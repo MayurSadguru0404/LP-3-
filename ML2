@@ -1,0 +1,43 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+
+df = pd.read_csv("emails.csv")
+df.head()
+
+df.drop('Email No.', axis=1, inplace=True)
+df.dropna(inplace=True)
+X = df.drop('Prediction', axis=1)
+y = df['Prediction']
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42)
+
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+knn = KNeighborsClassifier(n_neighbors=5)
+knn.fit(X_train, y_train)
+y_pred_knn = knn.predict(X_test)
+print("KNN Accuracy:", accuracy_score(y_test, y_pred_knn))
+print(classification_report(y_test, y_pred_knn))
+
+svm = SVC(kernel='linear')
+svm.fit(X_train, y_train)
+y_pred_svm = svm.predict(X_test)
+print("SVM Accuracy:", accuracy_score(y_test, y_pred_svm))
+print(classification_report(y_test, y_pred_svm))
+
+results = pd.DataFrame({
+    'Algorithm': ['KNN', 'SVM'],
+    'Accuracy': [
+        accuracy_score(y_test, y_pred_knn),
+        accuracy_score(y_test, y_pred_svm)]})
+print(results)
