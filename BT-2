@@ -1,0 +1,40 @@
+mkdir BankSmartContract
+cd BankSmartContract
+
+npm init -y
+
+npm install --save-dev hardhat
+
+npx hardhat --init
+
+npx hardhat compile
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.28;
+
+contract BankAccount {
+
+    mapping(address => uint) private balances;
+
+    // Deposit money
+    function deposit() public payable {
+        require(msg.value > 0, "Amount must be greater than zero");
+        balances[msg.sender] += msg.value;
+    }
+
+    // Withdraw money
+    function withdraw(uint amount) public {
+        require(amount > 0, "Amount must be greater than zero");
+        require(amount <= balances[msg.sender], "Insufficient balance");
+
+        balances[msg.sender] -= amount;
+
+        (bool success, ) = payable(msg.sender).call{value: amount}("");
+        require(success, "Transfer failed");
+    }
+
+    // Show balance
+    function showBalance() public view returns (uint) {
+        return balances[msg.sender];
+    }
+}
